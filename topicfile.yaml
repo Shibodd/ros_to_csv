@@ -1,6 +1,16 @@
-/imu/acceleration: [
+/sensors/core: [
   t: $STAMP_TO_NS(header.stamp),
-  x: vector.x,
-  y: vector.y,
-  z: vector.z,
+  vx: state.speed
+]
+/sensors/imu: [
+  t: $STAMP_TO_NS(header.stamp),
+  ax: imu.linear_acceleration.x,
+  ay: imu.linear_acceleration.y,
+  phidot: imu.angular_velocity.z
+]
+/scan_matching/twist: [
+  t: $STAMP_TO_NS(header.stamp),
+  vx: twist.linear.x,
+  vy: twist.linear.y,
+  phidot: twist.angular.z
 ]

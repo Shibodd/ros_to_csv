@@ -6,14 +6,28 @@ import csv
 import function_repo
 
 class BagReader:
-  def __init__(self, topics, *paths, start = None, stop = None):
+  def __init__(self, topics, paths, additional_msgdef_paths, start = None, stop = None):
     import rosbags.highlevel
+    import rosbags.typesys
 
     self.__reader = rosbags.highlevel.AnyReader(paths)
     
     self.__topics = topics
     self.__start = start
     self.__stop = stop
+
+    def guess_msgtype(path: pathlib.Path):
+      name = path.relative_to(path.parents[2]).with_suffix('')
+      if 'msg' not in name.parts:
+        name = name.parent / 'msg' / name.name
+      return str(name)
+
+    custom_types = {}
+    for path in additional_msgdef_paths:
+      msgdef = path.read_text(encoding='utf-8')
+      custom_types.update(rosbags.typesys.get_types_from_msg(msgdef, guess_msgtype(path)))
+
+    self.__reader.typestore.register(custom_types)
 
   def __enter__(self):
     self.__reader.__enter__()
@@ -88,16 +102,17 @@ def parse_topicfile(path: pathlib.Path):
 
 if __name__ == '__main__':
   arg_parser = argparse.ArgumentParser()
-  arg_parser.add_argument('-b', '--bag', required=True, type=pathlib.Path)
-  arg_parser.add_argument('-o', '--outputdir', required=True, type=pathlib.Path)
-  arg_parser.add_argument('-t', '--topicfile', required=True, type=pathlib.Path)
+  arg_parser.add_argument('-b', '--bag', required=True, type=pathlib.Path, help='The path to the input bag')
+  arg_parser.add_argument('-o', '--outputdir', required=True, type=pathlib.Path, help='The directory in which to store the .csv files (one per topic)')
+  arg_parser.add_argument('-t', '--topicfile', required=True, type=pathlib.Path, help='The configuration file')
+  arg_parser.add_argument('-m', '--msgdefs', nargs='+', required=False, type=pathlib.Path, default=tuple(), help='Paths to additional message definitions')
   args = arg_parser.parse_args()
 
   topics = parse_topicfile(args.topicfile)
 
   args.outputdir.mkdir(exist_ok=True)
 
-  with BagReader(topics.keys(), args.bag) as reader:
+  with BagReader(topics.keys(), (args.bag, ), args.msgdefs) as reader:
     with CsvManager(args.outputdir, topics) as fm:
       for entry in reader:
         fm.writerow(*entry)
