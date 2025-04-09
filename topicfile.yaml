@@ -1,16 +1,26 @@
 /sensors/core: [
-  t: $STAMP_TO_NS(header.stamp),
-  vx: state.speed
+  t_bag_ns: $BAG_STAMP(),
+  t_header_ns: $STAMP_TO_NS(header.stamp),
+  wheel_speed_erpm: state.speed,
+  wheel_speed_m_s: "$SCALE_OFFSET(state.speed, 0.00012, 0)"
 ]
-/sensors/imu: [
-  t: $STAMP_TO_NS(header.stamp),
-  ax: imu.linear_acceleration.x,
-  ay: imu.linear_acceleration.y,
-  phidot: imu.angular_velocity.z
+/drive_manual: [
+  t_bag_ns: $BAG_STAMP(),
+  t_header_ns: $STAMP_TO_NS(header.stamp),
+  steering_angle_rad: drive.steering_angle,
+  speed_m_s: drive.speed
 ]
-/scan_matching/twist: [
-  t: $STAMP_TO_NS(header.stamp),
-  vx: twist.linear.x,
-  vy: twist.linear.y,
-  phidot: twist.angular.z
+/drive_parameters: [
+  t_bag_ns: $BAG_STAMP(),
+  t_header_ns: $STAMP_TO_NS(header.stamp),
+  steering_angle_rad: drive.steering_angle,
+  speed_m_s: drive.speed
+]
+/odometry/filter_state: [
+  t_header_ns: $STAMP_TO_NS(header.stamp),
+  vx: "$INDEX(state, 0)",
+  vy: "$INDEX(state, 1)",
+  r: "$INDEX(state, 2)",
+  ax: "$INDEX(state, 3)",
+  ay: "$INDEX(state, 4)"
 ]
