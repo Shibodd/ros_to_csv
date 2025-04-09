@@ -31,10 +31,16 @@ def scale_offset_factory(path, scale, offset):
     return path_get(msg, path) * float(scale) + float(offset)
   return scale_offset
    
+def index_array_factory(path, idx):
+  path = parse_path(path)
+  def index(_, msg):
+    return path_get(msg, path)[int(idx)]
+  return index
 
 FUNCTION_FACTORIES = {
   'GET': get_factory,
   'STAMP_TO_NS': stamp_to_ns_factory,
   'SCALE_OFFSET': scale_offset_factory,
-  'BAG_STAMP': bag_stamp_factory
+  'BAG_STAMP': bag_stamp_factory,
+  'INDEX': index_array_factory
 }
