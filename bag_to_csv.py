@@ -86,9 +86,9 @@ def parse_topicfile(path: pathlib.Path):
   ), "Each field definition must be a column name and string pair."
 
   def parse_field_def(field_def):
-    cmd = re.match(r'^\$([A-Z0-9_]+)\(([^\)]+)\)$', field_def)
+    cmd = re.match(r'^\$([A-Z0-9_]+)\(([^\)]*)\)$', field_def)
     if cmd:
-      name, args = cmd.group(1), [x.strip() for x in cmd.group(2).split(',')]
+      name, args = cmd.group(1), [x.strip() for x in cmd.group(2).split(',') if x.strip()]
     else:
       name, args = "GET", [field_def]
     return function_repo.FUNCTION_FACTORIES[name](*args)
